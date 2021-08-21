@@ -5,11 +5,19 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "server": "forever -w server.mjs"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
-    "vue": "^3.0.0"
+    "forever": "^4.0.1",
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+    "koa-router": "^10.0.0",
+    "moment": "^2.29.1",
+    "vue": "^3.0.0",
+    "xlsx-populate": "^1.21.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
