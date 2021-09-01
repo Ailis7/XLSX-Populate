@@ -1,23 +1,21 @@
 import moment from 'moment';
 
 const momentTime = (date, time, real = false) => {
+  const newDate = date.split('/').reverse();
+  newDate[1] = parseFloat(newDate[1]) - 1; // добавляем месяц
   if (real) {
-    return moment(
-      date // переобразуем и кладём с минутами
-        .split('/')
-        .reverse()
+    return moment( // переобразуем и кладём с минутами
+      newDate
         .concat(time.split(':')),
     )
-      .subtract(1, 'months')
+     
       .format();
   } else {
-    return moment(
-      date // переобразуем и кладём без минут
-        .split('/')
-        .reverse()
+    return moment( // переобразуем и кладём без минут
+      newDate
         .concat(time.split(':')[0], '00'),
     )
-      .subtract(1, 'months')
+
       .format();
   }
 };
