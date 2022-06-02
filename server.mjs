@@ -9,6 +9,7 @@ import mainCalculations from './node/mainCalculations.mjs';
 import getFromSportlevel from './node/getFromSportlevel.mjs';
 import writeToFile from './node/writeToFile.mjs';
 import getFromTechProblem from './node/getFromTechProblem.mjs'
+import getFromGetID from './node/id/getFromGetID.mjs'
 import simpleWrite from './node/simpleWrite.mjs'
 
 const router = new Router();
@@ -114,6 +115,14 @@ router.post('/techProblem', async (ctx, next) => {
   ctx.body = exportResult;
   await next();
 });
+
+router.post('/getID', async (ctx, next) => {
+    const exportResult = await getFromGetID(ctx.request.body);
+
+    // writeToFile(calc);
+    ctx.body = exportResult;
+    await next();
+  });
 
 app.use(router.routes()).use(router.allowedMethods());
 

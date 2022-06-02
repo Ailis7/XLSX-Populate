@@ -3,6 +3,7 @@ node_modules
 /dist
 /EXCEL
 /tech_problem
+/id
 
 # local env files
 .env.local
