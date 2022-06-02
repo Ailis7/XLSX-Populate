@@ -13,20 +13,10 @@ const writeToFile = (data) => {
           .addSheet(keys[i])
           .range(`A1:J${arr.length + 1}`);
         listRange.value(arr);
-        // listRange = workbook.sheet(`Sheet${i + 1}`).name(keys[i]); // переименовываем
       }
     }
     workbook.deleteSheet('Sheet1'); // лист с таким именем всё равно создаётся, тут криво немного работает в самой библе!!
     return workbook.toFileAsync('./EXCEL/out.xlsx');
-    // Modify the workbook.
-    // const r = workbook.sheet('Sheet1').range('A1:C3');
-    // r.value([
-    //   [1, 2, 3],
-    //   [4, 5, 6],
-    //   [7, 8, 9],
-    // ]);
-    // // Write to file.
-    // return workbook.toFileAsync('./EXCEL/out.xlsx');
   });
 };
 

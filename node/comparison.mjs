@@ -1,5 +1,29 @@
+const comparisonWithError = (first, second, errorCount = 2) => {
+  let errorCounter = errorCount;
+  let firstArr = first.split('');
+  let secondArr = second.split('');
+  if (firstArr.length < secondArr.length) {
+    const cahnge = firstArr;
+    firstArr = secondArr;
+    secondArr = cahnge;
+  }
+  let i = 0;
+  for (; i < firstArr.length; i += 1) {
+    if (firstArr[i] !== secondArr[i]) {
+      errorCounter -= 1;
+      if (firstArr[i + 1] === secondArr[i]) {
+        firstArr.splice(i, 1);
+      }
+      if (errorCounter < 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 // функция сравнения сравнивает Имена и возвращает Bool, например ("И.", 'Игорь') => true
-const comparison = (first, second) => {
+const comparison = (first, second, realSport) => {
   if (
     first === second || // тут немного не просто
     first // сначала проверили что они в тупую равны друг другу "Игорь" == "Игорь"
@@ -35,6 +59,11 @@ const comparison = (first, second) => {
     ['койотис', 'койотс'].indexOf(second) !== -1
   ) {
     return true;
+  }
+
+  // новый костыль для фифы, погрешность в 1 символ
+  if (realSport === 'FIFA') {
+    return comparisonWithError(first, second);
   }
   return false;
 };

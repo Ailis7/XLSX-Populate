@@ -4,9 +4,12 @@ import Router from 'koa-router';
 import koaBody from 'koa-body';
 
 import getFromCub from './node/getFromCub.mjs';
+import cubDataAsync from './node/cubDataAsync.mjs';
 import mainCalculations from './node/mainCalculations.mjs';
 import getFromSportlevel from './node/getFromSportlevel.mjs';
 import writeToFile from './node/writeToFile.mjs';
+import getFromTechProblem from './node/getFromTechProblem.mjs'
+import simpleWrite from './node/simpleWrite.mjs'
 
 const router = new Router();
 
@@ -69,15 +72,45 @@ app.use(async (ctx, next) => {
 
   await next();
 });
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    // will only respond with JSON
+    ctx.status = err.statusCode || err.status || 500;
+    ctx.body = {
+      message: err.message
+    };
+  }
+})
 
 router.get('/getResult', async (ctx, next) => {
   const exportResult = await getFromSportlevel();
-  // console.log('HEEEEEEEEEEEEEEEEEEEEEEEEEY')
   const result = await getFromCub();
-  // console.log('BEEEEEEEEEEEEEEEEEEEEEEEY')
   exportResult.cub = result;
   const calc = await mainCalculations(exportResult);
   writeToFile(calc);
+  ctx.body = calc;
+  await next();
+});
+
+router.post('/getResult', async (ctx, next) => {
+  const data = ctx.request.body;
+  // console.log(data)
+  // const result = await cubDataAsync(data)
+
+  // const result = await getFromCub();
+  ctx.body = data;
+  await next();
+});
+
+router.post('/techProblem', async (ctx, next) => {
+  // console.log(ctx.request.body)
+  const exportResult = await getFromTechProblem(ctx.request.body);
+  // const result = await getFromCub();
+  // exportResult.cub = result;
+  // const calc = await mainCalculations(exportResult);
+  simpleWrite(exportResult);
   ctx.body = exportResult;
   await next();
 });

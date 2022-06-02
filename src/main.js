@@ -1,4 +1,14 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import Vue from 'vue';
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import '@factoringplus/pl-components-pack/dist/styles/pl-components-pack.css'
+import App from './App.vue';
+import PlComponents from '@factoringplus/pl-components-pack'
 
-createApp(App).mount('#app')
+Vue.use(ElementUI);
+Vue.use(PlComponents);
+Vue.config.productionTip = false;
+
+new Vue({
+  render: (h) => h(App),
+}).$mount('#app');
