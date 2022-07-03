@@ -1,27 +1,29 @@
 import moment from 'moment';
-import sportSpike from './sportSpike.mjs';
-import comparison from './comparison.mjs';
+import stringComparison from 'string-comparison';
+
+const cutFunc = (command) => {
+  let parse = command.split(' (');
+  if (parse.length === 5) {
+    const memory = parse[2].split(' - ');
+    parse = `${parse[0]} (${parse[1]} - ${memory[1]} (${parse[3]}`;
+  } else {
+    parse = command;
+  }
+  return parse;
+};
+
+const Comparison = stringComparison.levenshtein;
 
 const mainCalculations = (allData) => {
   return new Promise((resolve) => {
     let data = allData;
     let sportCash = null;
-    // sportCash = 'Настольный теннис'; // для теста
     let commandCash = null;
-    const sportsExclude = [
-      // 'Counter-Strike',
-      // 'MMA',
-      // 'Баскетбол',
-      // 'Бокс',
-      // 'Водное поло',
-      // 'Волейбол',
-      // 'Настольный теннис',
-      'Футбол',
-      // 'Хоккей',
-      'FIFA',
-    ];
+    // const sportsExclude = [];
 
-    data.cub.forEach((element) => {
+    for (let indexCub = 0; indexCub < data.cub.length; indexCub += 1) {
+      // data.cub.forEach((element, indexCub) => {
+      const element = data.cub[indexCub];
       try {
         if (element[0] === 'Названия строк') {
           element.forEach((elem) => {
@@ -30,7 +32,16 @@ const mainCalculations = (allData) => {
           });
         } else if (data.unicSport.indexOf(element[0]) !== -1) {
           sportCash = element[0]; // если есть в выгрузке спортлелва - оперделяем вид спорта для дальнейших
-        } else if (sportsExclude.indexOf(element[0]) !== -1) {
+        } else if (
+          element[0] &&
+          !(
+            !element[0].split(' - ').length < 2 ||
+            !element[0].split(' — ').length < 2
+          ) &&
+          element[0].indexOf('.202') === -1
+        ) {
+          // console.log(element[0]);
+          // console.log(element[0].split(' - '), element[0].split(' — '), element[0].indexOf('.202') === -1)
           sportCash = null; // все остальные виды спорта - не смотрим
         } else if (sportCash) {
           let time = moment(element[0], 'DD.MM.YYYY HH:mm:ss', true);
@@ -50,76 +61,136 @@ const mainCalculations = (allData) => {
               elemSlvlIndex++
             ) {
               const elemSlvl = data.sportlvl[sportCash][elemSlvlIndex];
+              if (elemSlvl[7]) continue;
+              // не прямое совпадение времени!! Сразу в выборку.
+              let wrong = false;
               // сначала проверяем что у команд совпало время
-              if (elemSlvl[1] === time.format()) {
-                // настольный теннис
-                // if (commandCash === elemSlvl[3])
-                // записываем игроков из двух строк в кубе ("Абельмасов Игорь - Беляков Владимир") и спротлевела ("Абельмасов И. - Беляков В.")
+              if (elemSlvl[1] !== time.format()) {
+                wrong = !wrong;
+                // пилим проверку +\- 1 час от реального времени! [2], тут уже нет прямого совпадения
+                const plusHour = moment(elemSlvl[1]).add(1, 'hour');
+                const subtractHour = moment(elemSlvl[1]).subtract(1, 'hour');
 
-                let cubComandArr = commandCash.toLowerCase().split(' - '); //Куб, делим по тире, и кладем двух игроков в 2 елемента масива ["Абельмасов Игорь ", "Беляков Владимир"]
-                // prettier-ignore
-                let sportlvlComandArr = elemSlvl[3].toLowerCase().split(' - '); // Спотлевел делаем то же -  ["Абельмасов И. ", "Беляков В."]
-                if (sportCash === 'Хоккей') {
-                  // костыль для хоокея, т.к. там в скобках пишут хрень
-                  cubComandArr = cubComandArr.map((elem) => {
-                    return elem.replace(/\s\(.*\)/, '');
-                  });
-                  sportlvlComandArr = sportlvlComandArr.map((elem) => {
-                    return elem.replace(/\s\(.*\)/, '');
-                  });
-                }
-                const firstCubPlayer = cubComandArr[0].trim().split(' '); // нужно убрать пробелы в конце строки ("Абельмасов Игорь ") и приводим к массиву ['Абельмасов', 'Игорь']
-                // prettier-ignore
-                let firstSportlvlPlayer = sportlvlComandArr[0].trim().split(' '); // аналогично для Спорлевела
-                firstSportlvlPlayer = sportSpike(
-                  firstSportlvlPlayer,
-                  sportCash,
-                ); // костыль для воляна, там может быть вот такая команда "Альянс-про - Пайп-про"
+                if (!(time <= plusHour && time >= subtractHour)) continue;
+              }
+              let cubCommand = commandCash.toLowerCase();
+              let sportlvlCommand = elemSlvl[3].toLowerCase();
+              if (sportCash === 'Настольный теннис') {
+                let slvlTennis = sportlvlCommand.split(' ');
+                const cubTennis = cubCommand.split(' ');
                 if (
-                  // сопадение первых пар - фамилия, имя
-                  firstCubPlayer.every((elemName, index) => {
-                    return comparison(
-                      elemName,
-                      firstSportlvlPlayer[index],
-                      elemSlvl.realSport,
-                    );
-                  })
+                  slvlTennis[1][0] === cubTennis[1][0] ||
+                  slvlTennis[4][0] === cubTennis[4][0]
                 ) {
-                  const secondCubPlayer = cubComandArr[1].trim().split(' '); // теперь аналогично достаём вторую пару
-                  // prettier-ignore
-                  let secondSportlvlPlayer = sportlvlComandArr[1].trim().split(' '); // аналогично для Спорлевела
-                  secondSportlvlPlayer = sportSpike(
-                    secondSportlvlPlayer,
-                    sportCash,
-                  );
-                  if (
-                    // и проверяем вторую пару игроков
-                    secondCubPlayer.every((elemName, index) => {
-                      return comparison(
-                        elemName,
-                        secondSportlvlPlayer[index],
-                        elemSlvl.realSport,
-                      );
-                    })
-                  ) {
-                    // и так, мы проверили время и игроков в обоих командах, пора пихать данные из куба в спорлевеловский масив
-                    data.sportlvl[sportCash][elemSlvlIndex] = elemSlvl.concat(
-                      element.slice(1, 5),
-                    );
-                    data.sportlvl[sportCash][elemSlvlIndex].realSport =
-                      elemSlvl.realSport;
-
-                    break;
-                  }
+                  cubTennis[1] = slvlTennis[1];
+                  cubTennis[4] = slvlTennis[4];
+                  cubCommand = cubTennis.join(' ');
                 }
               }
+              if (sportCash === 'Волейбол') {
+                sportlvlCommand = cubCommand.replace(/-про/g, ' Про');
+                sportlvlCommand = cubCommand.replace(/(до 19)/g, '(мол)');
+                sportlvlCommand = cubCommand.replace(/(до 20)/g, '(мол)');
+                sportlvlCommand = cubCommand.replace(/(до 21)/g, '(мол)');
+              }
+              cubCommand = cutFunc(cubCommand);
+              sportlvlCommand = cutFunc(sportlvlCommand);
+
+              const result = Comparison.similarity(cubCommand, sportlvlCommand);
+              const difsByTime = !wrong ? 0.7 : 0.8;
+              if (result >= 0.95 && !wrong) {
+                let [, one, two, three, four] = element;
+                data.sportlvl[sportCash][elemSlvlIndex][4] = one;
+                data.sportlvl[sportCash][elemSlvlIndex][5] = two;
+                data.sportlvl[sportCash][elemSlvlIndex][6] = three;
+                data.sportlvl[sportCash][elemSlvlIndex][7] = four;
+                data.sportlvl[sportCash][elemSlvlIndex].realSport =
+                  elemSlvl.realSport;
+                data.sportlvl[sportCash][elemSlvlIndex][8] = null;
+                break;
+              } else if (result >= difsByTime) {
+                const option = {
+                  optionsResult: `${time.format(
+                    'DD.MM.YYYY HH:mm',
+                  )} ${commandCash}`,
+                  data: element,
+                  rate: result,
+                };
+                if (!data.sportlvl[sportCash][elemSlvlIndex][8]) {
+                  data.sportlvl[sportCash][elemSlvlIndex][8] = [];
+                }
+                data.sportlvl[sportCash][elemSlvlIndex][8].push(option);
+
+                continue;
+                // console.log(data.sportlvl[sportCash][elemSlvlIndex].options)
+              }
+              // // настольный теннис
+              // // if (commandCash === elemSlvl[3])
+              // // записываем игроков из двух строк в кубе ("Абельмасов Игорь - Беляков Владимир") и спротлевела ("Абельмасов И. - Беляков В.")
+
+              // let cubComandArr = commandCash.toLowerCase().split(' - '); //Куб, делим по тире, и кладем двух игроков в 2 елемента масива ["Абельмасов Игорь ", "Беляков Владимир"]
+              // // prettier-ignore
+              // let sportlvlComandArr = elemSlvl[3].toLowerCase().split(' - '); // Спотлевел делаем то же -  ["Абельмасов И. ", "Беляков В."]
+              // if (sportCash === 'Хоккей') {
+              //   // костыль для хоокея, т.к. там в скобках пишут хрень
+              //   cubComandArr = cubComandArr.map((elem) => {
+              //     return elem.replace(/\s\(.*\)/, '');
+              //   });
+              //   sportlvlComandArr = sportlvlComandArr.map((elem) => {
+              //     return elem.replace(/\s\(.*\)/, '');
+              //   });
+              // }
+              // const firstCubPlayer = cubComandArr[0].trim().split(' '); // нужно убрать пробелы в конце строки ("Абельмасов Игорь ") и приводим к массиву ['Абельмасов', 'Игорь']
+              // // prettier-ignore
+              // let firstSportlvlPlayer = sportlvlComandArr[0].trim().split(' '); // аналогично для Спорлевела
+              // firstSportlvlPlayer = sportSpike(firstSportlvlPlayer, sportCash); // костыль для воляна, там может быть вот такая команда "Альянс-про - Пайп-про"
+              // if (
+              //   // сопадение первых пар - фамилия, имя
+              //   firstCubPlayer.every((elemName, index) => {
+              //     return comparison(
+              //       elemName,
+              //       firstSportlvlPlayer[index],
+              //       sportCash,
+              //       wrong,
+              //     );
+              //   })
+              // ) {
+              //   const secondCubPlayer = cubComandArr[1].trim().split(' '); // теперь аналогично достаём вторую пару
+              //   // prettier-ignore
+              //   let secondSportlvlPlayer = sportlvlComandArr[1].trim().split(' '); // аналогично для Спорлевела
+              //   secondSportlvlPlayer = sportSpike(
+              //     secondSportlvlPlayer,
+              //     sportCash,
+              //   );
+              //   if (
+              //     // и проверяем вторую пару игроков
+              //     secondCubPlayer.every((elemName, index) => {
+              //       return comparison(
+              //         elemName,
+              //         secondSportlvlPlayer[index],
+              //         sportCash,
+              //         wrong,
+              //       );
+              //     })
+              //   ) {
+              //     // и так, мы проверили время и игроков в обоих командах, пора пихать данные из куба в спорлевеловский масив
+              //     data.sportlvl[sportCash][elemSlvlIndex] = elemSlvl.concat(
+              //       element.slice(1, 5),
+              //     );
+              //     data.sportlvl[sportCash][elemSlvlIndex].realSport =
+              //       elemSlvl.realSport;
+
+              //     break;
+              //   }
+              // }
+              // }
             }
           }
         }
       } catch (e) {
         console.log(e, 'ERROR');
       }
-    });
+    }
     // console.log('result', result); // настольник - 264
     let keys = Object.keys(data.sportlvl);
 
@@ -155,7 +226,7 @@ const mainCalculations = (allData) => {
       );
       data.sportlvl['Хоккей'] = data.sportlvl['Хоккей'].filter(
         (elem) => elem.realSport !== 'NHL',
-      )
+      );
     }
     if (data.sportlvl['Баскетбол']) {
       data.sportlvl['NBA 2K'] = data.sportlvl['Баскетбол'].filter(
@@ -163,17 +234,21 @@ const mainCalculations = (allData) => {
       );
       data.sportlvl['Баскетбол'] = data.sportlvl['Баскетбол'].filter(
         (elem) => elem.realSport !== 'NBA 2K',
-      )
+      );
 
       data.sportlvl['Баскетбол 3х3'] = data.sportlvl['Баскетбол'].filter(
         (elem) => elem.realSport === 'Баскетбол 3х3',
       );
       data.sportlvl['Баскетбол'] = data.sportlvl['Баскетбол'].filter(
         (elem) => elem.realSport !== 'Баскетбол 3х3',
-      )
+      );
     }
     for (let i = 0; i < keys.length; i++) {
-      if (keys[i] !== 'head' && data.sportlvl[keys[i]] && data.sportlvl[keys[i]].length > 0) {
+      if (
+        keys[i] !== 'head' &&
+        data.sportlvl[keys[i]] &&
+        data.sportlvl[keys[i]].length > 0
+      ) {
         data.sportlvl[keys[i]].unshift(data.sportlvl.head);
       }
     }

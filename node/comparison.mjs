@@ -61,8 +61,8 @@ const comparison = (first, second, realSport) => {
     return true;
   }
 
-  // новый костыль для фифы, погрешность в 1 символ
-  if (realSport === 'FIFA') {
+  // проверка с погрешностью
+  if (realSport !== 'Настольный теннис') {
     return comparisonWithError(first, second);
   }
   return false;

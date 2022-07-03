@@ -90,8 +90,15 @@ router.get('/getResult', async (ctx, next) => {
   const result = await getFromCub();
   exportResult.cub = result;
   const calc = await mainCalculations(exportResult);
-  writeToFile(calc);
+  // writeToFile(calc);
   ctx.body = calc;
+  await next();
+});
+
+router.post('/writeToFile', async (ctx, next) => {
+  const data = ctx.request.body;
+  writeToFile(data);
+  ctx.body = 'success';
   await next();
 });
 
