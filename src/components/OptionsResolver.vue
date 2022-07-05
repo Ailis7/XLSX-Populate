@@ -46,19 +46,23 @@ export default {
     };
   },
   mounted() {
+    console.log('hello')
     this.resultedSlvl();
   },
   methods: {
     change(optionIndex, item) {
+      console.log(optionIndex, item, 'optionIndex, item')
       let parse = [];
-      if (typeof optionIndex === 'number') {
-        parse = item.options[optionIndex].data;
+      if (optionIndex !== '') {
+        parse = item.options.filter(e => e.optionsResult === optionIndex)[0].data;
+        console.log(parse)
       }
       let [, one, two, three, four] = parse;
       this.data.sportlvl[item.key][item.index][4] = one;
       this.data.sportlvl[item.key][item.index][5] = two;
       this.data.sportlvl[item.key][item.index][6] = three;
       this.data.sportlvl[item.key][item.index][7] = four;
+      console.log(this.data.sportlvl[item.key][item.index], 'this.data.sportlvl[item.key][item.index]')
     },
     submit() {
        axios

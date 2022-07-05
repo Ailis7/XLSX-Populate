@@ -3,7 +3,7 @@ import momentTime from './momentTime.mjs';
 
 const getFromSportlevel = () => {
   return new Promise((resolve) => {
-    XlsxPopulate.fromFileAsync('./EXCEL/exportNew.xlsx').then((workbook) => {
+    XlsxPopulate.fromFileAsync('./EXCEL/export.xlsx').then((workbook) => {
       const sheetSLvl = workbook // достаём значения из выгрузки Спортлевела
         .sheet(0)
         .usedRange()
