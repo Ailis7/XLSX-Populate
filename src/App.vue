@@ -24,6 +24,7 @@
 			</div>
 		</div>
 		<div v-if="!show">
+			<el-button @click="show = !show">Назад</el-button>
 			<OptionsResolver :data.sync="data" />
 		</div>
 	</div>

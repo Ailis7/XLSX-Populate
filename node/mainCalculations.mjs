@@ -1,6 +1,24 @@
 import moment from 'moment';
 import stringComparison from 'string-comparison';
 
+const parserTennis = (elem) => {
+  let trimElem = elem.trim();
+  let newIndex = 0;
+
+  if (trimElem.indexOf('.мл.') !== -1) {
+    trimElem = trimElem.replace(/.мл./, '. мл.');
+    newIndex -= 1;
+  }
+  if (trimElem.indexOf('.ст.') !== -1) {
+    trimElem = trimElem.replace(/.ст./, '. ст.');
+    newIndex -= 1;
+  }
+  return {
+    elem: trimElem.split(' '),
+    index: trimElem.split(' ').length - 1 + newIndex,
+  };
+};
+
 const cutFunc = (command) => {
   let parse = command.split(' (');
   if (parse.length === 5) {
@@ -76,15 +94,32 @@ const mainCalculations = (allData) => {
               let cubCommand = commandCash.toLowerCase();
               let sportlvlCommand = elemSlvl[3].toLowerCase();
               if (sportCash === 'Настольный теннис') {
-                let slvlTennis = sportlvlCommand.split(' ');
-                const cubTennis = cubCommand.split(' ');
+                let indexOne, indexTwo;
+                let [firstSlvl, secondSlvl] = sportlvlCommand
+                  .split('-')
+                  .map((e) => parserTennis(e).elem);
+
+                let [firstCub, secondCub] = cubCommand
+                  .split('-')
+                  .map((e, i) => {
+                    const { elem, index } = parserTennis(e);
+                    if (i === 0) indexOne = index;
+                    if (i === 1) indexTwo = index;
+                    return elem;
+                  });
+
+                // let slvlTennis = sportlvlCommand.replace(/ {2}/g, ' ').split(' ');
+                // const cubTennis = cubCommand.replace(/ {2}/g, ' ').split(' ')
+                // // если длинное имя, например Ву Дуй Тиеп - Ву Дуй Т.
+                // const firstCommandIndex = slvlTennis.indexOf('-') - 1;
+                // const secondCommandIndex = slvlTennis.length - 1;
                 if (
-                  slvlTennis[1][0] === cubTennis[1][0] ||
-                  slvlTennis[4][0] === cubTennis[4][0]
+                  firstSlvl[indexOne][0] === firstCub[indexOne][0] ||
+                  secondSlvl[indexTwo][0] === secondCub[indexTwo][0]
                 ) {
-                  cubTennis[1] = slvlTennis[1];
-                  cubTennis[4] = slvlTennis[4];
-                  cubCommand = cubTennis.join(' ');
+                  firstCub[indexOne] = firstSlvl[indexOne];
+                  secondCub[indexTwo] = secondSlvl[indexTwo];
+                  cubCommand = `${firstCub.join(' ')} - ${secondCub.join(' ')}`;
                 }
               }
               if (sportCash === 'Волейбол') {
