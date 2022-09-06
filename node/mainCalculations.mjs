@@ -113,9 +113,12 @@ const mainCalculations = (allData) => {
                 // // если длинное имя, например Ву Дуй Тиеп - Ву Дуй Т.
                 // const firstCommandIndex = slvlTennis.indexOf('-') - 1;
                 // const secondCommandIndex = slvlTennis.length - 1;
+                // if (!firstSlvl[indexOne] || !firstCub[indexOne]) {
+                //   console.log('hello',firstSlvl, firstCub)
+                // }
                 if (
-                  firstSlvl[indexOne][0] === firstCub[indexOne][0] ||
-                  secondSlvl[indexTwo][0] === secondCub[indexTwo][0]
+                  firstSlvl[indexOne]?.[0] === firstCub[indexOne]?.[0] ||
+                  secondSlvl[indexTwo]?.[0] === secondCub[indexTwo]?.[0]
                 ) {
                   firstCub[indexOne] = firstSlvl[indexOne];
                   secondCub[indexTwo] = secondSlvl[indexTwo];
