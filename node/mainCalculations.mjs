@@ -31,31 +31,31 @@ const cutFunc = (command) => {
 };
 
 const estimation = (cubCo, slvlCo) => {
-  const arrCubCo = cubCo.split(' - ').map(e => e.split(' '));
-  const arrSlvlCo = slvlCo.split(' - ').map(e => e.split(' '));
-  
+  const arrCubCo = cubCo.split(' - ').map((e) => e.split(' '));
+  const arrSlvlCo = slvlCo.split(' - ').map((e) => e.split(' '));
+
   const c1 = arrCubCo[0];
   const c2 = arrCubCo[1];
   const s1 = arrSlvlCo[0];
   const s2 = arrSlvlCo[1];
-  
+
   let success = false;
   for (let i = 0; i < c1.length; i += 1) {
     if (c1[i] === 'ж' || c1[i] === 'мол' || c1[i] === 'д') continue;
-    s1.forEach(elem => {
+    s1.forEach((elem) => {
       if (elem === c1[i]) success = true;
-    })
+    });
   }
   if (success) {
-  	for (let i = 0; i < c2.length; i += 1) {
+    for (let i = 0; i < c2.length; i += 1) {
       if (c2[i] === 'ж' || c2[i] === 'мол' || c2[i] === 'д') continue;
-      s2.forEach(elem => {
-      	if (elem === c2[i]) success = 'win'
-    	})
+      s2.forEach((elem) => {
+        if (elem === c2[i]) success = 'win';
+      });
     }
   }
   return success === 'win';
-}
+};
 
 const Comparison = stringComparison.levenshtein;
 
@@ -153,18 +153,20 @@ const mainCalculations = (allData) => {
                 }
               }
               if (sportCash === 'Волейбол') {
-                sportlvlCommand = cubCommand.replace(/-про/g, ' Про');
-                sportlvlCommand = cubCommand.replace(/(до 19)/g, '(мол)');
-                sportlvlCommand = cubCommand.replace(/(до 20)/g, '(мол)');
-                sportlvlCommand = cubCommand.replace(/(до 21)/g, '(мол)');
+                sportlvlCommand = sportlvlCommand.replace(/-про/g, ' Про');
+                sportlvlCommand = sportlvlCommand.replace(/(до 19)/g, '(мол)');
+                sportlvlCommand = sportlvlCommand.replace(/(до 20)/g, '(мол)');
+                sportlvlCommand = sportlvlCommand.replace(/(до 21)/g, '(мол)');
               }
               cubCommand = cutFunc(cubCommand).replace(/\(|\)/g, '');
-              sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, '');;
-
+              sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, '');
 
               const result = Comparison.similarity(cubCommand, sportlvlCommand);
               const difsByTime = !wrong ? 0.7 : 0.8;
-              if ((result >= 0.95 && !wrong) || (estimation(cubCommand, sportlvlCommand) && !wrong)) {
+              if (
+                (result >= 0.95 && !wrong) ||
+                (estimation(cubCommand, sportlvlCommand) && !wrong)
+              ) {
                 let [, one, two, three, four] = element;
                 data.sportlvl[sportCash][elemSlvlIndex][4] = one;
                 data.sportlvl[sportCash][elemSlvlIndex][5] = two;
