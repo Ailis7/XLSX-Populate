@@ -163,10 +163,7 @@ const mainCalculations = (allData) => {
 
               const result = Comparison.similarity(cubCommand, sportlvlCommand);
               const difsByTime = !wrong ? 0.7 : 0.8;
-              if (
-                (result >= 0.95 && !wrong) ||
-                (estimation(cubCommand, sportlvlCommand) && !wrong)
-              ) {
+              if (result >= 0.95 && !wrong) {
                 let [, one, two, three, four] = element;
                 data.sportlvl[sportCash][elemSlvlIndex][4] = one;
                 data.sportlvl[sportCash][elemSlvlIndex][5] = two;
@@ -176,7 +173,10 @@ const mainCalculations = (allData) => {
                   elemSlvl.realSport;
                 data.sportlvl[sportCash][elemSlvlIndex][8] = null;
                 break;
-              } else if (result >= difsByTime) {
+              } else if (
+                result >= difsByTime ||
+                (estimation(cubCommand, sportlvlCommand) && !wrong)
+              ) {
                 const option = {
                   optionsResult: `${time.format(
                     'DD.MM.YYYY HH:mm',
