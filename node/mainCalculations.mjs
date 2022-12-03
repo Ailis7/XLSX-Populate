@@ -158,12 +158,36 @@ const mainCalculations = (allData) => {
                 sportlvlCommand = sportlvlCommand.replace(/(до 20)/g, '(мол)');
                 sportlvlCommand = sportlvlCommand.replace(/(до 21)/g, '(мол)');
               }
+              if (sportCash === 'Хоккей' && !elemSlvl.realSport) {
+                // костыль для хоокея, т.к. там в скобках пишут хрень
+                cubCommand = cubCommand.split(' - ').map((elem) => {
+                  return elem.replace(/\s\(.*\)/, '').trim()
+                }).join(' - ');
+                sportlvlCommand = sportlvlCommand.split(' - ').map((elem) => {
+                  return elem.replace(/\s\(.*\)/, '').trim()
+                }).join(' - ');
+              }
+
               cubCommand = cutFunc(cubCommand).replace(/\(|\)/g, '');
               sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, '');
 
               const result = Comparison.similarity(cubCommand, sportlvlCommand);
-              const difsByTime = !wrong ? 0.7 : 0.8;
-              if (result >= 0.95 && !wrong) {
+              let secondStep = 0.95;
+              if (!wrong) {
+                const arrCubCo = cubCommand.split(' - ').map((e) => e.split(' '));
+                const arrSlvlCo = sportlvlCommand.split(' - ').map((e) => e.split(' '));
+              
+                const c1 = arrCubCo[0];
+                const c2 = arrCubCo[1];
+                const s1 = arrSlvlCo[0];
+                const s2 = arrSlvlCo[1];
+                if (c1[0]&&c2[0] && s1[0] && s2[0] && Comparison.similarity(c1[0], s1[0]) === 1 && Comparison.similarity(c2[0], s2[0]) === 1) secondStep = 0.8;
+                if (c1[1]&&c2[1] && s1[1] && s2[1] && Comparison.similarity(c1[1], s1[1]) >= 0.9 && Comparison.similarity(c2[1], s2[1]) >= 0.9) secondStep = 0.7;
+              }
+              const difsByTime = 
+              
+              !wrong ? 0.7 : 0.8;
+              if (result >= secondStep && !wrong) {
                 let [, one, two, three, four] = element;
                 data.sportlvl[sportCash][elemSlvlIndex][4] = one;
                 data.sportlvl[sportCash][elemSlvlIndex][5] = two;
