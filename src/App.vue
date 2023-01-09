@@ -114,6 +114,7 @@ export default {
 			axios
 				.get(process.env.VUE_APP_URL + "/getResult")
 				.then((res) => {
+					console.log(res,' res')
 					this.loading = false;
 					this.show = false;
 					this.data = res.data;

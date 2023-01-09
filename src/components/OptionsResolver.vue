@@ -14,7 +14,7 @@
           :value-key="items.key"
         >
           <el-option
-            v-for="(option) in items.options"
+            v-for="option in items.options"
             :key="option.optionsResult"
             :label="option.optionsResult"
             :value="option.optionsResult"
@@ -33,11 +33,12 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
+import moment from "moment"
 
 export default {
-  name: 'OptionsResolver',
-  props: ['data'],
+  name: "OptionsResolver",
+  props: ["data"],
   data() {
     return {
       value: [],
@@ -46,29 +47,21 @@ export default {
     };
   },
   mounted() {
-    console.log('hello')
     this.resultedSlvl();
   },
   methods: {
     change(optionIndex, item) {
-      console.log(optionIndex, item, 'optionIndex, item')
       let parse = [];
-      if (optionIndex !== '') {
-        parse = item.options.filter(e => e.optionsResult === optionIndex)[0].data;
-        console.log(parse)
+      if (optionIndex !== "") {
+        parse = item.options.filter((e) =>  e.optionsResult === optionIndex)
       }
-      let [, one, two, three, four] = parse;
-      this.data.sportlvl[item.key][item.index][4] = one;
-      this.data.sportlvl[item.key][item.index][5] = two;
-      this.data.sportlvl[item.key][item.index][6] = three;
-      this.data.sportlvl[item.key][item.index][7] = four;
-      console.log(this.data.sportlvl[item.key][item.index], 'this.data.sportlvl[item.key][item.index]')
+      this.data.sportlvl[item.key][item.index].financeData = parse[0].data.financeData;
     },
     submit() {
-       axios
-        .post(process.env.VUE_APP_URL + '/writeToFile', this.data)
+      axios
+        .post(process.env.VUE_APP_URL + "/writeToFile", this.data)
         .then((res) => {
-          console.log(res, 'REEES');
+          console.log(res, "REEES");
         });
     },
     resultedSlvl() {
@@ -77,20 +70,16 @@ export default {
       const keys = Object.keys(parseingObj);
       keys.forEach((key) => {
         // this.value[key] = []
-        if (key !== 'head') {
+        if (key !== "head") {
           parseingObj[key].forEach((result, index) => {
-            if (index > 0) {
-              if (result[8]) {
-                if (!resultedSlvl[key]) resultedSlvl[key] = [];
-                resultedSlvl[key].push({
-                  result: `${result[1].replaceAll('/', '.')} ${result[2]} ${
-                    result[3]
-                  }`,
-                  options: result[8],
-                  index,
-                  key,
-                });
-              }
+            if (result.options) {
+              if (!resultedSlvl[key]) resultedSlvl[key] = [];
+              resultedSlvl[key].push({
+                result: `${moment(result.time).format("DD.MM.YYYY HH:mm")} ${result.players}`,
+                options: result.options,
+                index,
+                key,
+              });
             }
           });
         }
@@ -100,8 +89,7 @@ export default {
       this.start = true;
     },
   },
-  computed: {
-  },
+  computed: {},
 };
 </script>
 
