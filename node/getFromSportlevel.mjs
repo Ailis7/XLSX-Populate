@@ -4,8 +4,8 @@ import momentTime from './momentTime.mjs';
 
 const getFromSportlevel = () => {
   return new Promise((resolve) => {
-    // XlsxPopulate.fromFileAsync('./EXCEL/export.xlsx').then((workbook) => {
-    XlsxPopulate.fromFileAsync('./EXCEL/SlvlTest.xlsx').then((workbook) => {
+    XlsxPopulate.fromFileAsync('./EXCEL/export.xlsx').then((workbook) => {
+    // XlsxPopulate.fromFileAsync('./EXCEL/SlvlTest.xlsx').then((workbook) => {
 
       const sheetSLvl = workbook // достаём значения из выгрузки Спортлевела
         .sheet(0)

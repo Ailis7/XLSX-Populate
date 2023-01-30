@@ -19,6 +19,7 @@
     "koa-body": "^4.2.0",
     "koa-router": "^10.1.1",
     "moment": "^2.29.1",
+    "pg": "^8.8.0",
     "string-comparison": "^1.1.0",
     "utf-8-validate": "^5.0.9",
     "vue": "^2.6.11",

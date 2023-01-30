@@ -1,5 +1,15 @@
-import moment from "moment";
 import stringComparison from "string-comparison";
+import { getCommandArrFromDB } from "../dataBase/index.mjs";
+
+const dbParser = (cubcommand, dbCommand, slvlRealCommand) => {
+  if (dbCommand) {
+    const dbParseResult = dbCommand.find(
+      (dbElem) => dbElem.commandname === cubcommand
+    )?.commandname;
+    return dbParseResult ? slvlRealCommand : cubcommand;
+  }
+  return cubcommand;
+};
 
 const parserTennis = (elem) => {
   let trimElem = elem.trim();
@@ -20,7 +30,13 @@ const parserTennis = (elem) => {
 };
 
 const cutFunc = (command) => {
-  let parse = command.split(" (");
+  let parse;
+  try {
+    parse = command.split(" (");
+  } catch (e) {
+    console.log(e);
+  }
+
   if (parse.length === 5) {
     const memory = parse[2].split(" - ");
     parse = `${parse[0]} (${parse[1]} - ${memory[1]} (${parse[3]}`;
@@ -60,7 +76,7 @@ const estimation = (cubCo, slvlCo) => {
 const Comparison = stringComparison.levenshtein;
 
 const mainCalculations = (data) => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const allData = data;
 
     // виды спорта, ключи спортлевела
@@ -77,7 +93,7 @@ const mainCalculations = (data) => {
           currentSlvlSportSpecies === "head" ||
           !allData.cub[currentSlvlSportSpecies]
         )
-          continue; // пропускаем шапку и если нет таких видлв спорта в кубе
+          continue; // пропускаем шапку и если нет таких видов спорта в кубе
         const currentSlvlSportArr = allData.sportlvl[currentSlvlSportSpecies];
 
         for (
@@ -87,6 +103,35 @@ const mainCalculations = (data) => {
         ) {
           const inSlvlArr = currentSlvlSportArr[currentSlvlIndexElem];
           const cubContentForSearch = allData.cub[currentSlvlSportSpecies];
+
+          // slvlBlock
+          let sportlvlCommand = inSlvlArr.players.toLowerCase();
+          if (currentSlvlSportSpecies === "Волейбол") {
+            sportlvlCommand = sportlvlCommand.replace(/-про/g, " про");
+            sportlvlCommand = sportlvlCommand.replace(/(до 19)/g, "(мол)");
+            sportlvlCommand = sportlvlCommand.replace(/(до 20)/g, "(мол)");
+            sportlvlCommand = sportlvlCommand.replace(/(до 21)/g, "(мол)");
+          }
+          if (currentSlvlSportSpecies === "Хоккей" && !inSlvlArr.realSport) {
+            sportlvlCommand = sportlvlCommand
+              .split(" - ")
+              .map((elem) => {
+                return elem.replace(/\s\(.*\)/, "").trim();
+              })
+              .join(" - ");
+          }
+          sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, "");
+
+          const sportlvlPlayers = sportlvlCommand.split(" - ");
+
+          const DBcubPlayersFirst = await getCommandArrFromDB(
+            sportlvlPlayers[0]
+          );
+          const DBcubPlayersSecond = await getCommandArrFromDB(
+            sportlvlPlayers[1]
+          );
+
+          // end SlvlBlock
 
           for (
             let cubElementIndex = 0;
@@ -106,7 +151,7 @@ const mainCalculations = (data) => {
             if (!(diffInMinutes <= 60 && diffInMinutes >= -60)) continue; // если больше
 
             let cubCommand = cubElement.players.toLowerCase();
-            let sportlvlCommand = inSlvlArr.players.toLowerCase();
+            if (cubCommand.match(/^есть совпадение с -/g) !== null) continue;
 
             if (currentSlvlSportSpecies === "Настольный теннис") {
               let indexOne, indexTwo;
@@ -114,36 +159,32 @@ const mainCalculations = (data) => {
                 .split("-")
                 .map((e) => parserTennis(e).elem);
 
-              let [firstCub, secondCub] = cubCommand.split("-").map((e, i) => {
-                const { elem, index } = parserTennis(e);
-                if (i === 0) indexOne = index;
-                if (i === 1) indexTwo = index;
-                return elem;
-              });
-              if (
-                (firstSlvl[indexOne]?.[0] === firstCub[indexOne]?.[0]) &
-                (secondSlvl[indexTwo]?.[0] === secondCub[indexTwo]?.[0])
-              ) {
-                firstCub[indexOne] = firstSlvl[indexOne];
-                secondCub[indexTwo] = secondSlvl[indexTwo];
-                cubCommand = `${firstCub.join(" ")} - ${secondCub.join(" ")}`;
+              let [firstCub, secondCub] = cubCommand
+                .split(" - ")
+                .map((e, i) => {
+                  const { elem, index } = parserTennis(e);
+                  if (i === 0) indexOne = index;
+                  if (i === 1) indexTwo = index;
+                  return elem;
+                });
+              if (firstSlvl[indexOne]?.[0] === firstCub[indexOne]?.[0]) {
+                // проверка на двойное имя - Корп Петр Оливер (в кубе: "Корп П.О.")
+                firstCub[indexOne] = firstSlvl[indexOne + 1]
+                  ? `${firstSlvl[indexOne]} ${firstSlvl[indexOne + 1]}`
+                  : firstSlvl[indexOne];
               }
-            }
-            if (currentSlvlSportSpecies === "Волейбол") {
-              sportlvlCommand = sportlvlCommand.replace(/-про/g, " Про");
-              sportlvlCommand = sportlvlCommand.replace(/(до 19)/g, "(мол)");
-              sportlvlCommand = sportlvlCommand.replace(/(до 20)/g, "(мол)");
-              sportlvlCommand = sportlvlCommand.replace(/(до 21)/g, "(мол)");
-            }
-            if (currentSlvlSportSpecies === "Хоккей" && !inSlvlArr.realSport) {
+              if (secondSlvl[indexTwo]?.[0] === secondCub[indexTwo]?.[0]) {
+                secondCub[indexTwo] = secondSlvl[indexTwo + 1]
+                  ? `${secondSlvl[indexOne]} ${secondSlvl[indexOne + 1]}`
+                  : secondSlvl[indexOne];
+              }
+              cubCommand = `${firstCub.join(" ")} - ${secondCub.join(" ")}`;
+            } else if (
+              currentSlvlSportSpecies === "Хоккей" &&
+              !inSlvlArr.realSport
+            ) {
               // костыль для хоокея, т.к. там в скобках пишут хрень
               cubCommand = cubCommand
-                .split(" - ")
-                .map((elem) => {
-                  return elem.replace(/\s\(.*\)/, "").trim();
-                })
-                .join(" - ");
-              sportlvlCommand = sportlvlCommand
                 .split(" - ")
                 .map((elem) => {
                   return elem.replace(/\s\(.*\)/, "").trim();
@@ -152,34 +193,41 @@ const mainCalculations = (data) => {
             }
 
             cubCommand = cutFunc(cubCommand).replace(/\(|\)/g, "");
-            sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, "");
             const result = Comparison.similarity(cubCommand, sportlvlCommand);
 
-            let secondStep = 0.95;
-            if (!idealTime) {
-              const arrCubCo = cubCommand.split(" - ").map((e) => e.split(" "));
-              const arrSlvlCo = sportlvlCommand
-                .split(" - ")
-                .map((e) => e.split(" "));
+            const cubPlayers = cubCommand.split(" - ");
+            // вот тут сравнение с базой
+            cubPlayers[0] = dbParser(
+              cubPlayers[0],
+              DBcubPlayersFirst,
+              sportlvlPlayers[0]
+            );
+            cubPlayers[1] = dbParser(
+              cubPlayers[1],
+              DBcubPlayersSecond,
+              sportlvlPlayers[1]
+            );
+            //
+
+            let secondStep = 0.95; // вернуть 0.95
+            if (idealTime && result < secondStep) {
+              const arrCubCo = cubPlayers.map((e) => e.split(" "));
+              const arrSlvlCo = sportlvlPlayers.map((e) => e.split(" "));
 
               const c1 = arrCubCo[0];
               const c2 = arrCubCo[1];
               const s1 = arrSlvlCo[0];
               const s2 = arrSlvlCo[1];
 
-              try {
-                if (
-                  c1[0] &&
-                  c2[0] &&
-                  s1[0] &&
-                  s2[0] &&
-                  Comparison.similarity(c1[0], s1[0]) === 1 &&
-                  Comparison.similarity(c2[0], s2[0]) === 1
-                )
-                  secondStep = 0.8;
-              } catch {
-                console.log("hello");
-              }
+              if (
+                c1[0] &&
+                c2[0] &&
+                s1[0] &&
+                s2[0] &&
+                Comparison.similarity(c1[0], s1[0]) === 1 &&
+                Comparison.similarity(c2[0], s2[0]) === 1
+              )
+                secondStep -= 0.15;
               if (
                 c1[1] &&
                 c2[1] &&
@@ -188,7 +236,7 @@ const mainCalculations = (data) => {
                 Comparison.similarity(c1[1], s1[1]) >= 0.9 &&
                 Comparison.similarity(c2[1], s2[1]) >= 0.9
               )
-                secondStep = 0.7;
+                secondStep -= 0.15;
             }
 
             const difsByTime = idealTime ? 0.7 : 0.8;
@@ -217,6 +265,22 @@ const mainCalculations = (data) => {
                 }`,
                 data: cubElement,
                 rate: result,
+                fisrtPlayers:
+                  Comparison.similarity(cubPlayers[0], sportlvlPlayers[0]) >=
+                  0.9
+                    ? null
+                    : {
+                        cubCommand: cubPlayers[0],
+                        slvlCommand: sportlvlPlayers[0],
+                      },
+                secondPlayers:
+                  Comparison.similarity(cubPlayers[1], sportlvlPlayers[1]) >=
+                  0.9
+                    ? null
+                    : {
+                        cubCommand: cubPlayers[1],
+                        slvlCommand: sportlvlPlayers[1],
+                      },
               };
               if (
                 !allData.sportlvl[currentSlvlSportSpecies][currentSlvlIndexElem]
