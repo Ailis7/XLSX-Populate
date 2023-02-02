@@ -4,7 +4,7 @@ import moment from "moment";
 const getFromCub = () => {
   return new Promise((resolve) => {
     XlsxPopulate.fromFileAsync(
-      "./EXCEL/Спортлевел отчёт декабрь 2022.xlsx"
+      "./EXCEL/Спортлевел отчёт январь 2023.xlsx"
       // "./EXCEL/cubtest.xlsx"
     ).then((workbook) => {
       const sheetCub = workbook // достаём значения из выгрузки Куба
@@ -21,7 +21,12 @@ const getFromCub = () => {
       for (let i = 2; i < sheetCub.length; i += 1) {
         const currentSportArr = sheetCub[i];
         if (!currentSportArr[0]) break;
-        const currentSportSpecies = currentSportArr[0];
+        let currentSportSpecies = currentSportArr[0];
+        let realSport;
+        if (currentSportSpecies === 'Шорт-хоккей') {
+          realSport = 'Шорт-хоккей';
+          currentSportSpecies = 'Хоккей'
+        }
 
         if (!(currentSportSpecies in result)) result[currentSportSpecies] = [];
         // выдираем время и делаем валидный набор игроков
@@ -47,6 +52,7 @@ const getFromCub = () => {
           players: command,
           time: moment(replaceTime, "(YYYY-MM-DD HH:mm:ss)"),
           financeData: currentSportArr.slice(2),
+          realSport,
         };
         result[currentSportSpecies].push(cubObj);
       }

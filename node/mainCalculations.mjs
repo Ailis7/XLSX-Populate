@@ -245,6 +245,13 @@ const mainCalculations = (data) => {
               allData.sportlvl[currentSlvlSportSpecies][
                 currentSlvlIndexElem
               ].financeData = cubElement.financeData;
+
+              if (cubElement.realSport) {
+                allData.sportlvl[currentSlvlSportSpecies][
+                  currentSlvlIndexElem
+                ].realSport = cubElement.realSport;
+              }
+
               allData.sportlvl[currentSlvlSportSpecies][
                 currentSlvlIndexElem
               ].options = null;
@@ -294,6 +301,11 @@ const mainCalculations = (data) => {
                 currentSlvlIndexElem
               ].options.push(option);
 
+              if (cubElement.realSport) {
+                allData.sportlvl[currentSlvlSportSpecies][
+                  currentSlvlIndexElem
+                ].realSport = cubElement.realSport;
+              }
               continue;
             }
           }
@@ -306,6 +318,7 @@ const mainCalculations = (data) => {
     slvlKeys.push("NHL");
     slvlKeys.push("NBA 2K");
     slvlKeys.push("Баскетбол 3х3");
+    slvlKeys.push("Шорт-хоккей");
     if (allData.sportlvl["Футбол"]) {
       allData.sportlvl["FIFA"] = allData.sportlvl["Футбол"].filter(
         (elem) => elem.realSport === "FIFA"
@@ -318,8 +331,11 @@ const mainCalculations = (data) => {
       allData.sportlvl["NHL"] = allData.sportlvl["Хоккей"].filter(
         (elem) => elem.realSport === "NHL"
       );
+      allData.sportlvl["Шорт-хоккей"] = allData.sportlvl["Хоккей"].filter(
+        (elem) => elem.realSport === "Шорт-хоккей"
+      );
       allData.sportlvl["Хоккей"] = allData.sportlvl["Хоккей"].filter(
-        (elem) => elem.realSport !== "NHL"
+        (elem) => elem.realSport !== "NHL" && elem.realSport !== "Шорт-хоккей"
       );
     }
     if (allData.sportlvl["Баскетбол"]) {

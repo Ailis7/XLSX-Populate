@@ -1,0 +1,38 @@
+const  glossary = {
+  "CRVENA ZVEZDA": "Црвена Звезда",
+  "CZECH REPUBLIC": "Чехия",
+  AUSTRALIA: "Австралия",
+  BARCELONA: "Барселона",
+  CANADA: "Канада",
+  CHINA: "Китай",
+  CSKA: "ЦСКА",
+  FENERBAHCE: "Фенербахче",
+  FINLAND: "Финляндия",
+  FRANCE: "Франция",
+  GERMANY: "Германия",
+  GREECE: "Греция",
+  ITALY: "Италия",
+  MACCABI: "Маккаби",
+  OLYMPIACOS: "Олимпиакос",
+  PANATHINAIKOS: "Панатинаикос",
+  REAL: "Реал",
+  RUSSIA: "Россия",
+  SLOVENIA: "Словения",
+  SPAIN: "Испания",
+  SWEDEN: "Швеция",
+  SWITZERLAND: "Швейцария",
+  UNICS: "УНИКС",
+  USA: "США",
+  ZENIT: "Зенит",
+  
+  CROATIA: "Хорватия",
+  LITHUANIA: "Литва",
+  ISRAEL: "Израиль",
+  LATVIA: "Латвия",
+  POLAND: "Польша",
+  SERBIA: "Сербия",
+  TURKEY: "Турция",
+  DENMARK: "Дания"
+};
+
+export default glossary;

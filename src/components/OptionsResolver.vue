@@ -29,7 +29,7 @@
         <div>
           <h3 style="color: #8fc023">{{ item.result }}</h3>
           <el-select
-            v-on:change="change(...arguments, item)"
+            v-on:change="change(...arguments, item, ind)"
             clearable
             style="width: 100%"
             v-model="value[i + ind]"
@@ -66,7 +66,8 @@
                   writeToBase(
                     item.currentOptionFirstPlayers.slvlCommand,
                     item.currentOptionFirstPlayers.cubCommand,
-                    item
+                    item,
+                    ind
                   )
                 "
                 style="padding: 2px 5px; width: 100%"
@@ -102,6 +103,7 @@
                     item.currentOptionSecondPlayers.slvlCommand,
                     item.currentOptionSecondPlayers.cubCommand,
                     item,
+                    ind,
                     'second'
                   )
                 "
@@ -145,23 +147,26 @@ export default {
     this.resultedSlvl();
   },
   methods: {
-    change(optionIndex, item) {
+    change(optionIndex, item, slvArrIndex) {
       let parse = [];
       if (optionIndex !== "") {
         parse = item.options.filter((e) => e.optionsResult === optionIndex);
       }
-
+      console.log('optionIndex, item', optionIndex, item);
+      console.log('this.slvlArr, slvArrIndex', this.slvlArr, slvArrIndex)
       // для отправки на бэк запомненных комманд
-      this.slvlArr[item.key][item.index].currentOptionFirstPlayers =
+      this.slvlArr[item.key][slvArrIndex].currentOptionFirstPlayers =
         parse[0]?.fisrtPlayers;
-      this.slvlArr[item.key][item.index].firstMemoryStatus = null;
+      this.slvlArr[item.key][slvArrIndex].firstMemoryStatus = null;
 
-      this.slvlArr[item.key][item.index].currentOptionSecondPlayers =
+      this.slvlArr[item.key][slvArrIndex].currentOptionSecondPlayers =
         parse[0]?.secondPlayers;
-      this.slvlArr[item.key][item.index].secondMemoryStatus = null;
+      this.slvlArr[item.key][slvArrIndex].secondMemoryStatus = null;
 
+      console.log('this.slvlArr[item.key][item.index]', this.slvlArr[item.key][item.index])
       this.data.sportlvl[item.key][item.index].financeData =
         parse[0].data.financeData;
+        console.log('this.data.sportlvl[item.key][item.index]', this.data.sportlvl[item.key][item.index])
     },
     submit() {
       axios
@@ -194,7 +199,7 @@ export default {
       this.slvlArr = resultedSlvl;
       this.start = true;
     },
-    writeToBase(slvlCommand, cubCommand, item, commandPos = "first") {
+    writeToBase(slvlCommand, cubCommand, item, slvlArrIndex, commandPos = "first") {
       this.disabled = true;
       axios
         .post(process.env.VUE_APP_URL + "/addCommandToDB", {
@@ -203,9 +208,9 @@ export default {
         })
         .then((res) => {
           if (commandPos === "first") {
-            this.slvlArr[item.key][item.index].firstMemoryStatus = res.data;
+            this.slvlArr[item.key][slvlArrIndex].firstMemoryStatus = res.data;
           } else {
-            this.slvlArr[item.key][item.index].secondMemoryStatus = res.data;
+            this.slvlArr[item.key][slvlArrIndex].secondMemoryStatus = res.data;
           }
           this.reRender += 1;
         })
