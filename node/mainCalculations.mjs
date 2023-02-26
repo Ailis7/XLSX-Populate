@@ -46,6 +46,26 @@ const cutFunc = (command) => {
   return parse;
 };
 
+function removeValuesInBrackets(commands) {
+  const result = commands
+    .split(" - ")
+    .map((elem) => {
+      const regex = /\((мол|до 19|до 20|до 21|ж)\)/g;
+      let savedAge;
+      const newStr = elem.replace(regex, (match, group) => {
+        savedAge = `${group}`;
+        return "";
+      });
+      return (
+        newStr.replace(/\s\(.*\)/, "").trim() +
+        (savedAge ? (savedAge === "(ж)" ? "(ж)" : " (мол)") : "")
+      );
+    })
+    .join(" - ");
+
+  return result.replace(/хк/g, "");
+}
+
 const estimation = (cubCo, slvlCo) => {
   const arrCubCo = cubCo.split(" - ").map((e) => e.split(" "));
   const arrSlvlCo = slvlCo.split(" - ").map((e) => e.split(" "));
@@ -108,17 +128,10 @@ const mainCalculations = (data) => {
           let sportlvlCommand = inSlvlArr.players.toLowerCase();
           if (currentSlvlSportSpecies === "Волейбол") {
             sportlvlCommand = sportlvlCommand.replace(/-про/g, " про");
-            sportlvlCommand = sportlvlCommand.replace(/(до 19)/g, "(мол)");
-            sportlvlCommand = sportlvlCommand.replace(/(до 20)/g, "(мол)");
-            sportlvlCommand = sportlvlCommand.replace(/(до 21)/g, "(мол)");
+            sportlvlCommand = removeValuesInBrackets(sportlvlCommand);
           }
           if (currentSlvlSportSpecies === "Хоккей" && !inSlvlArr.realSport) {
-            sportlvlCommand = sportlvlCommand
-              .split(" - ")
-              .map((elem) => {
-                return elem.replace(/\s\(.*\)/, "").trim();
-              })
-              .join(" - ");
+            sportlvlCommand = removeValuesInBrackets(sportlvlCommand);
           }
           sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, "");
 
@@ -184,12 +197,9 @@ const mainCalculations = (data) => {
               !inSlvlArr.realSport
             ) {
               // костыль для хоокея, т.к. там в скобках пишут хрень
-              cubCommand = cubCommand
-                .split(" - ")
-                .map((elem) => {
-                  return elem.replace(/\s\(.*\)/, "").trim();
-                })
-                .join(" - ");
+              cubCommand = removeValuesInBrackets(cubCommand);
+            } else if (currentSlvlSportSpecies === "Волейбол") {
+              cubCommand = removeValuesInBrackets(cubCommand);
             }
 
             cubCommand = cutFunc(cubCommand).replace(/\(|\)/g, "");
