@@ -23,9 +23,9 @@ app.use(
     multipart: true,
     json: true,
     text: true,
-    formLimit: "10mb",
-    jsonLimit: "10mb",
-    textLimit: "10mb",
+    formLimit: "20mb",
+    jsonLimit: "20mb",
+    textLimit: "20mb",
     enableTypes: ["json", "form", "text"],
   })
 );

@@ -4,7 +4,7 @@ import moment from "moment";
 const getFromCub = () => {
   return new Promise((resolve) => {
     XlsxPopulate.fromFileAsync(
-      "./EXCEL/Спортлевел отчёт январь 2023.xlsx"
+      "./EXCEL/Спортлевел отчёт май 2023.xlsx"
       // "./EXCEL/cubtest.xlsx"
     ).then((workbook) => {
       const sheetCub = workbook // достаём значения из выгрузки Куба

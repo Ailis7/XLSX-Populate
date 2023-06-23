@@ -58,7 +58,7 @@ function removeValuesInBrackets(commands) {
       });
       return (
         newStr.replace(/\s\(.*\)/, "").trim() +
-        (savedAge ? (savedAge === "(ж)" ? "(ж)" : " (мол)") : "")
+        (savedAge ? (savedAge === "ж" ? " (ж)" : " (мол)") : "")
       );
     })
     .join(" - ");
@@ -221,8 +221,17 @@ const mainCalculations = (data) => {
 
             let secondStep = 0.95; // вернуть 0.95
             if (idealTime && result < secondStep) {
-              const arrCubCo = cubPlayers.map((e) => e.split(" "));
-              const arrSlvlCo = sportlvlPlayers.map((e) => e.split(" "));
+              let arrCubCo
+              let arrSlvlCo
+              try {
+                
+                arrCubCo = cubPlayers.map((e) => e.split(" "));
+                arrSlvlCo = sportlvlPlayers.map((e) => e.split(" "));
+              } catch(e) {
+                const a = cubPlayers;
+                const b= sportlvlPlayers
+                console.log()
+              }
 
               const c1 = arrCubCo[0];
               const c2 = arrCubCo[1];
