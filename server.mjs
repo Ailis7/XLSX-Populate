@@ -4,15 +4,13 @@ import Router from "koa-router";
 import koaBody from "koa-body";
 
 import getFromCub from "./node/getFromCub.mjs";
-import cubDataAsync from "./node/cubDataAsync.mjs";
 import mainCalculations from "./node/mainCalculations.mjs";
 import getFromSportlevel from "./node/getFromSportlevel.mjs";
 import writeToFile from "./node/writeToFile.mjs";
-import getFromTechProblem from "./node/getFromTechProblem.mjs";
-import getFromTechProblem2 from "./node/getFromTechProblem2.mjs";
-import getFromGetID from "./node/id/getFromGetID.mjs";
-import simpleWrite from "./node/simpleWrite.mjs";
 import { addCommandToDB } from "./dataBase/index.mjs";
+
+import betradarParse from "./node/betradar/betradarParse.mjs";
+import simpleWrite from "./node/simpleWrite.mjs";
 
 const router = new Router();
 
@@ -113,29 +111,10 @@ router.post("/addCommandToDB", async (ctx, next) => {
   await next();
 });
 
-router.post("/techProblem", async (ctx, next) => {
-  // console.log(ctx.request.body)
-  const exportResult = await getFromTechProblem(ctx.request.body);
-  // const result = await getFromCub();
-  // exportResult.cub = result;
-  // const calc = await mainCalculations(exportResult);
-  simpleWrite(exportResult);
-  ctx.body = exportResult;
-  await next();
-});
-
-router.get("/techProblem2", async (ctx, next) => {
-  const exportResult = await getFromTechProblem2();
-  // simpleWrite(exportResult);
-  ctx.body = exportResult;
-  await next();
-});
-
-router.post("/getID", async (ctx, next) => {
-  const exportResult = await getFromGetID(ctx.request.body);
-
-  // writeToFile(calc);
-  ctx.body = exportResult;
+router.get("/betradarParse", async (ctx, next) => {
+  const startParse = await betradarParse();
+  simpleWrite(startParse);
+  ctx.body = startParse;
   await next();
 });
 
