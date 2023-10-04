@@ -1,6 +1,6 @@
 import XlsxPopulate from "xlsx-populate";
 import glossarySports from "./glossarySports.mjs";
-const folderName = './EXCEL/June betradar/'
+const folderName = './EXCEL/September betradar/'
 
 const getBetradar = () => {
   return new Promise((resolve) => {

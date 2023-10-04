@@ -4,7 +4,7 @@ import moment from "moment";
 const getFromCub = () => {
   return new Promise((resolve) => {
     XlsxPopulate.fromFileAsync(
-      "./EXCEL/Спортлевел отчёт июнь 2023.xlsx"
+      "./EXCEL/Спортлевел отчёт 1 октября.xlsx"
       // "./EXCEL/cubtest.xlsx"
     ).then((workbook) => {
       const sheetCub = workbook // достаём значения из выгрузки Куба
@@ -21,11 +21,11 @@ const getFromCub = () => {
       for (let i = 2; i < sheetCub.length; i += 1) {
         const currentSportArr = sheetCub[i];
         if (!currentSportArr[0]) break;
-        let currentSportSpecies = currentSportArr[0];
+        let currentSportSpecies = currentSportArr[0].toLowerCase();
         let realSport;
-        if (currentSportSpecies === 'Шорт-хоккей') {
-          realSport = 'Шорт-хоккей';
-          currentSportSpecies = 'Хоккей'
+        if (currentSportSpecies === 'шорт-хоккей') {
+          realSport = 'шорт-хоккей';
+          currentSportSpecies = 'хоккей'
         }
 
         if (!(currentSportSpecies in result)) result[currentSportSpecies] = [];

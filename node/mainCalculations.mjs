@@ -126,11 +126,11 @@ const mainCalculations = (data) => {
 
           // slvlBlock
           let sportlvlCommand = inSlvlArr.players.toLowerCase();
-          if (currentSlvlSportSpecies === "Волейбол") {
+          if (currentSlvlSportSpecies === "волейбол") {
             sportlvlCommand = sportlvlCommand.replace(/-про/g, " про");
             sportlvlCommand = removeValuesInBrackets(sportlvlCommand);
           }
-          if (currentSlvlSportSpecies === "Хоккей" && !inSlvlArr.realSport) {
+          if (currentSlvlSportSpecies === "хоккей" && !inSlvlArr.realSport) {
             sportlvlCommand = removeValuesInBrackets(sportlvlCommand);
           }
           sportlvlCommand = cutFunc(sportlvlCommand).replace(/\(|\)/g, "");
@@ -166,7 +166,7 @@ const mainCalculations = (data) => {
             let cubCommand = cubElement.players.toLowerCase();
             if (cubCommand.match(/^есть совпадение с -/g) !== null) continue;
 
-            if (currentSlvlSportSpecies === "Настольный теннис") {
+            if (currentSlvlSportSpecies === "настольный теннис") {
               let indexOne, indexTwo;
               let [firstSlvl, secondSlvl] = sportlvlCommand
                 .split("-")
@@ -193,12 +193,12 @@ const mainCalculations = (data) => {
               }
               cubCommand = `${firstCub.join(" ")} - ${secondCub.join(" ")}`;
             } else if (
-              currentSlvlSportSpecies === "Хоккей" &&
+              currentSlvlSportSpecies === "хоккей" &&
               !inSlvlArr.realSport
             ) {
               // костыль для хоокея, т.к. там в скобках пишут хрень
               cubCommand = removeValuesInBrackets(cubCommand);
-            } else if (currentSlvlSportSpecies === "Волейбол") {
+            } else if (currentSlvlSportSpecies === "волейбол") {
               cubCommand = removeValuesInBrackets(cubCommand);
             }
 

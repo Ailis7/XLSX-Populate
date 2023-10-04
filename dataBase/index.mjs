@@ -75,13 +75,16 @@ const addCommandToDB = async (sportlvlName, cubName) => {
 };
 
 const getCommandArrFromDB = async (commandName) => {
+  commandName = commandName.replace(/'/g, " ");
   return await new Promise((resolve) => {
     db.query(
       `SELECT * FROM sportLevelCommand slc WHERE slc.commandName = '${commandName}'`,
       (err, slvlData) => {
-        if (err) throw new Error(err);
+        if (err) {
+          throw new Error("Ошибка от БАЗЫЫЫ", err);
+        }
         if (slvlData.rows.length === 0) {
-          resolve(null)
+          resolve(null);
         } else {
           db.query(
             `SELECT * from sportLevelCommand slc
@@ -89,7 +92,7 @@ const getCommandArrFromDB = async (commandName) => {
             WHERE slc.commandName = '${commandName}'`,
             (err5, data) => {
               if (err5) throw new Error(err5);
-              resolve(data.rows)
+              resolve(data.rows);
             }
           );
         }

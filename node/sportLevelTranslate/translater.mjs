@@ -2,7 +2,7 @@ import glossary from "./glossary.mjs";
 
 const splitAndSearch = (str) => {
   const commandArr = str.split(" (");
-  commandArr[0] = glossary[commandArr[0]] || commandArr[0];
+  commandArr[0] = glossary[commandArr[0]?.toUpperCase()] || commandArr[0]?.toUpperCase();
   return commandArr.join(" (");
 };
 

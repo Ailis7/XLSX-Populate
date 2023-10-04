@@ -37,6 +37,8 @@ const getFromSportlevel = () => {
             sportName = "Баскетбол"; //костыль для Баскетбол 3х3
             elem.realSport = "Баскетбол 3х3";
           }
+          sportName = sportName?.toLowerCase();
+          elem.realSport = elem.realSport?.toLowerCase();
           // console.log(elem, 'elem')
           if (!(sportName in result)) {
             result[sportName] = [];
